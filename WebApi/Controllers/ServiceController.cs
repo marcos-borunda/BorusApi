@@ -1,4 +1,7 @@
 using System;
+using System.Linq;
+using System.Net;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using WebApi.BusinessLogic;
@@ -9,24 +12,36 @@ namespace WebApi.Controllers
   [Route("[controller]")]
   public class ServiceController : ControllerBase
   {
-    private readonly IClientTranslator clientTranslator;
+    private readonly ICommandTranslator commandTranslator;
     private readonly ILogger<ServiceController> logger;
 
-    public ServiceController(IClientTranslator clientTranslator, ILogger<ServiceController> logger)
+    public ServiceController(ICommandTranslator commandTranslator, ILogger<ServiceController> logger)
     {
-      this.clientTranslator = clientTranslator ?? throw new ArgumentNullException(nameof(clientTranslator));
+      this.commandTranslator = commandTranslator ?? throw new ArgumentNullException(nameof(commandTranslator));
       this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     [HttpGet]
-    public IActionResult Get(string command)
+    public IActionResult Get(string statement)
     {
-        var response = this.clientTranslator.TranslateAndExecute(command);
+        var commandWords = statement.Split(' ').ToList();
 
-        if (response is null || response.Status == StatusResponse.NotFound)
-            return NotFound();
+        if (commandWords.Count < 2)
+            return BadRequest($"{nameof(statement)}: '{statement}' is not valid. It should have at least 2 words (service and command).");
+
+        var command = this.commandTranslator.Translate(commandWords);
+
+        if (command is null)
+            return NotFound($"{nameof(statement)}: '{statement}' is not valid. Service was not found.");
         
-        return Ok(response);
+        var invoker = new Invoker(command);
+
+        var response = invoker.Invoke();
+
+        if (response.Status == StatusResponse.Error)
+            return StatusCode(StatusCodes.Status500InternalServerError, $"Error while executing {nameof(statement)} '{statement}'.");
+
+        return Ok(response.Message);
     }
   }
 }

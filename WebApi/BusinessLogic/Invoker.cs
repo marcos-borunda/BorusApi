@@ -4,18 +4,19 @@ using WebApi.BusinessLogic.Commands;
 
 namespace WebApi.BusinessLogic
 {
-    public class Invoker
+    public class Invoker : IInvoker
     {
-        public ICommand Command { get; set; }
+        private readonly ICommand command;
 
         public Invoker(ICommand command)
         {
-            Command = command ?? throw new ArgumentNullException(nameof(command));
+            this.command = command ?? throw new ArgumentNullException(nameof(command));
         }
 
-        public void Invoke(IEnumerable<string>? parameters = null)
+        public Response Invoke(IEnumerable<string>? parameters = null)
         {
-            Command.Execute(parameters);
+            this.command.Execute(parameters);
+            return this.command.Response ?? new Response(StatusResponse.Error, "Error while invoking command.");
         }
     }
 }

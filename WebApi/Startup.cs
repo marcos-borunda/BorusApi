@@ -1,17 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using WebApi.BusinessLogic;
-using WebApi.BusinessLogic.Implementation;
 using WebApi.BusinessLogic.Services;
 
 namespace WebApi
@@ -29,7 +21,7 @@ namespace WebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.Add(new ServiceDescriptor(typeof(IClientTranslator), new ClientTranslator())); 
+            services.Add(new ServiceDescriptor(typeof(ICommandTranslator), new CommandTranslator())); 
             services.Add(new ServiceDescriptor(typeof(IMovistar), new Movistar())); 
         }
 
