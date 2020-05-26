@@ -5,6 +5,6 @@ namespace WebApi.BusinessLogic
 {
     public interface ICommandTranslator
     {
-        ICommand? Translate(IList<string> stringCommands);
+        ICommand? Translate(string service, string action, IEnumerable<string>? parameters = null);
     }
 }

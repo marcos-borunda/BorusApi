@@ -8,20 +8,17 @@ namespace WebApi.BusinessLogic
 {
     public class CommandTranslator : ICommandTranslator
     {
-        public ICommand? Translate(IList<string> commandWords)
+        public ICommand? Translate(string service, string action, IEnumerable<string>? parameters = null)
         {
-            if (commandWords.Count < 2)
-                return null;
-
-            var receiver = CreateReceiver(receiver: commandWords[0], parameters: commandWords.Skip(2));
+            var receiver = CreateReceiver(receiver: service, parameters);
 
             if (receiver is null)
                 return null;
 
-            return CreateCommand(command: commandWords[1], receiver);
+            return CreateCommand(command: action, receiver);
         }
 
-        private object? CreateReceiver(string receiver, IEnumerable<string> parameters)
+        private object? CreateReceiver(string receiver, IEnumerable<string>? parameters)
             => receiver switch
             {
                 "movistar" => new Movistar(),

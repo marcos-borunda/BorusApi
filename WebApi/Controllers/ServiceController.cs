@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +9,7 @@ using WebApi.BusinessLogic;
 namespace WebApi.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class ServiceController : ControllerBase
     {
         private readonly ICommandTranslator commandTranslator;
@@ -20,23 +21,18 @@ namespace WebApi.Controllers
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        [HttpGet]
-        public IActionResult Get(string statement)
+        [HttpGet("{service}/{method}")]
+        public IActionResult Get(string service, string method, [FromQuery] IEnumerable<string>? parameters)
         {
-            var commandWords = statement.Split(' ').ToList();
-
-            if (commandWords.Count < 2)
-                return BadRequest($"{nameof(statement)}: '{statement}' is not valid. It should have at least 2 words (service and command).");
-
-            var command = this.commandTranslator.Translate(commandWords);
+            var command = this.commandTranslator.Translate(service, method, parameters);
 
             if (command is null)
-                return NotFound($"{nameof(statement)}: '{statement}' is not valid. Service was not found.");
+                return NotFound($"Service '{service}/{method}' was not found.");
 
             var response = new Invoker(command).Invoke();
 
             if (response.Status == StatusResponse.Error)
-                return StatusCode(StatusCodes.Status500InternalServerError, $"{nameof(statement)}: '{statement}'. Error while executing.");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"{nameof(service)}: '{service}'. Error while executing.");
 
             return Ok(response.Message);
         }
