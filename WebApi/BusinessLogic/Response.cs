@@ -1,5 +1,3 @@
-using System;
-
 namespace WebApi.BusinessLogic
 {
     public class Response
