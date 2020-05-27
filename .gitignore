@@ -227,6 +227,9 @@ FakesAssemblies/
 **/*.Server/ModelManifest.xml
 _Pvt_Extensions
 
+# VS Code workspace
+.vscode/
+
 # Paket dependency manager
 .paket/paket.exe
 
