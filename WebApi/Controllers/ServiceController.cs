@@ -32,13 +32,12 @@ namespace WebApi.Controllers
                 return NotFound(message);
             }
 
-            var response = new Invoker(commandInstance).Invoke();
+            var response = new Invoker(commandInstance).Invoke(parameters);
 
             if (response.Status == StatusResponse.Error)
             {
-                var message = $"{nameof(service)}: '{service}'. Error while executing.";
-                this.logger.LogError(message);
-                return StatusCode(StatusCodes.Status500InternalServerError, message);
+                this.logger.LogError(response.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, response.Message);
             }
 
             return Ok(response.Message);

@@ -23,18 +23,19 @@ namespace WebApi.BusinessLogic
             if (command is null)
                 throw new ArgumentNullException(nameof(command));
 
-            var receiver = CreateReceiver(receiver: service, parameters);
+            var receiver = CreateReceiver(receiver: service.ToLower(), parameters);
 
             if (receiver is null)
                 return null;
 
-            return CreateCommand(command: command, receiver);
+            return CreateCommand(command.ToLower(), receiver);
         }
 
         private object? CreateReceiver(string receiver, IEnumerable<string>? parameters)
             => receiver switch
             {
                 "movistar" => new Movistar(),
+                "light" => new Light(),
                 _ => null
             };
 
@@ -42,6 +43,8 @@ namespace WebApi.BusinessLogic
             => command switch
             {
                 "datos" => new MovistarDataUsageCommand((IMovistar)receiver, this.loggerFactory.CreateLogger<MovistarDataUsageCommand>()),
+                "on" => new LightTurnOnCommand((ILight)receiver, this.loggerFactory.CreateLogger<LightTurnOnCommand>()),
+                "off" => new LightTurnOffCommand((ILight)receiver, this.loggerFactory.CreateLogger<LightTurnOffCommand>()),
                 _ => null
             };
     }
