@@ -21,8 +21,8 @@ namespace WebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.Add(new ServiceDescriptor(typeof(ICommandTranslator), new CommandTranslator())); 
-            services.Add(new ServiceDescriptor(typeof(IMovistar), new Movistar())); 
+            services.AddScoped<ICommandTranslator, CommandTranslator>();
+            services.AddScoped<IMovistar, Movistar>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

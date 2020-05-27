@@ -8,14 +8,14 @@ namespace WebApi.BusinessLogic.Commands
     public class MovistarDataUsageCommand : ICommand
     {
         private readonly IMovistar movistar;
-        //private readonly ILogger<MovistarDataUsageCommand> logger;
+        private readonly ILogger<MovistarDataUsageCommand> logger;
 
         private Response? response;
 
-        public MovistarDataUsageCommand(IMovistar movistar)//, ILogger<MovistarDataUsageCommand> logger)
+        public MovistarDataUsageCommand(IMovistar movistar, ILogger<MovistarDataUsageCommand> logger)
         {
             this.movistar = movistar ?? throw new ArgumentNullException(nameof(movistar));
-            //this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public Response? Response => response;
@@ -26,10 +26,10 @@ namespace WebApi.BusinessLogic.Commands
             {
                 this.response = new Response(StatusResponse.Ok, message: movistar.GetDataUsage());
             }
-            catch(Exception)
+            catch(Exception ex)
             {
                 var errorMessage = "Error while getting Movistar's data usage.";
-                //logger.LogError(ex, errorMessage);
+                logger.LogError(ex, errorMessage);
                 this.response = new Response(StatusResponse.Error, errorMessage);
             }
         }

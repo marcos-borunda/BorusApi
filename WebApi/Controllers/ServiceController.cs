@@ -21,18 +21,26 @@ namespace WebApi.Controllers
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        [HttpGet("{service}/{method}")]
-        public IActionResult Get(string service, string method, [FromQuery] IEnumerable<string>? parameters)
+        [HttpGet("{service}/{command}")]
+        public IActionResult Get(string service, string command, [FromQuery] IEnumerable<string>? parameters)
         {
-            var command = this.commandTranslator.Translate(service, method, parameters);
+            var commandInstance = this.commandTranslator.Translate(service, command, parameters);
 
-            if (command is null)
-                return NotFound($"Service '{service}/{method}' was not found.");
+            if (commandInstance is null)
+            {
+                var message = $"Service '{service}/{command}' was not found.";
+                this.logger.LogWarning(message);
+                return NotFound(message);
+            }
 
-            var response = new Invoker(command).Invoke();
+            var response = new Invoker(commandInstance).Invoke();
 
             if (response.Status == StatusResponse.Error)
-                return StatusCode(StatusCodes.Status500InternalServerError, $"{nameof(service)}: '{service}'. Error while executing.");
+            {
+                var message = $"{nameof(service)}: '{service}'. Error while executing.";
+                this.logger.LogError(message);
+                return StatusCode(StatusCodes.Status500InternalServerError, message);
+            }
 
             return Ok(response.Message);
         }

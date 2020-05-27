@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using Microsoft.Extensions.Logging;
 using WebApi.BusinessLogic.Commands;
 using WebApi.BusinessLogic.Services;
 
@@ -8,14 +8,27 @@ namespace WebApi.BusinessLogic
 {
     public class CommandTranslator : ICommandTranslator
     {
-        public ICommand? Translate(string service, string action, IEnumerable<string>? parameters = null)
+        private readonly ILoggerFactory loggerFactory;
+
+        public CommandTranslator(ILoggerFactory loggerFactory)
         {
+            this.loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
+        }
+
+        public ICommand? Translate(string service, string command, IEnumerable<string>? parameters = null)
+        {
+            if (service is null)
+                throw new ArgumentNullException(nameof(service));
+
+            if (command is null)
+                throw new ArgumentNullException(nameof(command));
+
             var receiver = CreateReceiver(receiver: service, parameters);
 
             if (receiver is null)
                 return null;
 
-            return CreateCommand(command: action, receiver);
+            return CreateCommand(command: command, receiver);
         }
 
         private object? CreateReceiver(string receiver, IEnumerable<string>? parameters)
@@ -24,11 +37,11 @@ namespace WebApi.BusinessLogic
                 "movistar" => new Movistar(),
                 _ => null
             };
-        
+
         private ICommand? CreateCommand(string command, object receiver)
             => command switch
             {
-                "datos" => new MovistarDataUsageCommand((IMovistar) receiver),
+                "datos" => new MovistarDataUsageCommand((IMovistar)receiver, this.loggerFactory.CreateLogger<MovistarDataUsageCommand>()),
                 _ => null
             };
     }
